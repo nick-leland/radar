@@ -1,0 +1,10 @@
+{
+    "disableAutoUpdate": true,
+    "name": "Logging",
+    "author": "nick-leland",
+    "description": "A script that logs events to an external API.",
+    "options": {
+        "niceName": "Logging",
+        "guiName": "Logging"
+    }
+}
