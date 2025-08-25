@@ -1,10 +1,20 @@
 {
-    "disableAutoUpdate": true,
-    "name": "Logging",
-    "author": "nick-leland",
-    "description": "A script that logs events to an external API.",
-    "options": {
-        "niceName": "Logging",
-        "guiName": "Logging"
+  "name": "player-position-logger",
+  "author": "Your Name",
+  "description": "A simple mod that logs and displays the player's current position in the game world",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "tera-game-state": "^1.0.0"
+  },
+  "commands": [
+    {
+      "name": "pos",
+      "description": "Display current player position"
+    },
+    {
+      "name": "poslog", 
+      "description": "Toggle position logging on/off"
     }
+  ]
 }
