@@ -11,6 +11,7 @@ module.exports = function PlayerPositionLogger(mod) {
     // Cache the latest position data
     let lastPosition = null;
     let lastFacingDirection = null;
+    let lastDestination = null;
 
     // Game State Variables
     let player = null;
@@ -91,9 +92,22 @@ module.exports = function PlayerPositionLogger(mod) {
         }
     }
 
+    // Helper function to convert radians to degrees
+    function radiansToDegrees(radians) {
+        return (radians * 180) / Math.PI;
+    }
+
     // ------------------------------- PLAYER LOCATION HOOKS -------------------------------
     // hook into player location packets to get real-time updates
     mod.hook('C_PLAYER_LOCATION', 5, (event) => {
+        // Cache the latest position data for the pos command
+        if (event && event.loc) {
+            lastPosition = event.loc;
+            lastFacingDirection = event.w;
+            lastLookDirection = event.lookDirection;
+            lastDestination = event.dest;
+        }
+        
         const logData = {
             timestamp: new Date().toISOString(),
             hook: 'C_PLAYER_LOCATION',
@@ -114,6 +128,11 @@ module.exports = function PlayerPositionLogger(mod) {
 
     // Hook into user aim packets for more accurate direction
     mod.hook('C_USER_AIM', 1, (event) => {
+        // Cache the latest aim data for the pos command
+        if (event) {
+            lastAimData = event;
+        }
+        
         const logData = {
             timestamp: new Date().toISOString(),
             hook: 'C_USER_AIM',
@@ -436,11 +455,6 @@ module.exports = function PlayerPositionLogger(mod) {
     playerLevelInterval = setInterval(logPlayerLevel, 1000);
 
 
-    // Helper function to convert radians to degrees
-    function radiansToDegrees(radians) {
-        return (radians * 180) / Math.PI;
-    }
-
     // ------------------------------- COMMANDS -------------------------------
     // Command to manually get current position
     mod.command.add('pos', () => {
@@ -452,13 +466,13 @@ module.exports = function PlayerPositionLogger(mod) {
             let message = `Position: X=${Math.round(pos.x * 100) / 100}, Y=${Math.round(pos.y * 100) / 100}, Z=${Math.round(pos.z * 100) / 100}`;
             
             if (facing !== undefined && facing !== 0) {
-                const degrees = radiansToDegrees(facing);
-                message += `\nFacing: ${Math.round(facing * 100) / 100} rad (${Math.round(degrees * 10) / 10}°)`;
+                const facingDegrees = radiansToDegrees(facing);
+                message += `\nFacing: ${Math.round(facing * 100) / 100} rad (${Math.round(facingDegrees * 10) / 10}°)`;
             }
             
             if (lastLookDirection !== null && lastLookDirection !== 0) {
-                const degrees = radiansToDegrees(lastLookDirection);
-                message += `\nLook: ${Math.round(lastLookDirection * 100) / 100} rad (${Math.round(degrees * 10) / 10}°)`;
+                const lookDegrees = radiansToDegrees(lastLookDirection);
+                message += `\nLook: ${Math.round(lastLookDirection * 100) / 100} rad (${Math.round(lookDegrees * 10) / 10}°)`;
             }
             
             if (lastAimData) {
@@ -473,6 +487,38 @@ module.exports = function PlayerPositionLogger(mod) {
         }
     });
 
+    // Command to show detailed position information including destination
+    mod.command.add('posdetail', () => {
+        // Try to get the most recent C_PLAYER_LOCATION data
+        if (lastPosition) {
+            let message = `Position: X=${Math.round(lastPosition.x * 100) / 100}, Y=${Math.round(lastPosition.y * 100) / 100}, Z=${Math.round(lastPosition.z * 100) / 100}`;
+            
+            if (lastFacingDirection !== undefined && lastFacingDirection !== 0) {
+                const facingDegrees = radiansToDegrees(lastFacingDirection);
+                message += `\nFacing: ${Math.round(lastFacingDirection * 100) / 100} rad (${Math.round(facingDegrees * 10) / 10}°)`;
+            }
+            
+            if (lastLookDirection !== null && lastLookDirection !== 0) {
+                const lookDegrees = radiansToDegrees(lastLookDirection);
+                message += `\nLook: ${Math.round(lastLookDirection * 100) / 100} rad (${Math.round(lookDegrees * 10) / 10}°)`;
+            }
+            
+            if (lastAimData) {
+                const yawDegrees = radiansToDegrees(lastAimData.yaw);
+                message += `\nAim: ${Math.round(lastAimData.yaw * 100) / 100} rad (${Math.round(yawDegrees * 10) / 10}°)`;
+            }
+            
+            if (lastDestination) {
+                message += `\nDestination: X=${Math.round(lastDestination.x * 100) / 100}, Y=${Math.round(lastDestination.y * 100) / 100}, Z=${Math.round(lastDestination.z * 100) / 100}`;
+            }
+            
+            mod.command.message(message);
+            console.log(`[PlayerPosition] ${message}`);
+        } else {
+            mod.command.message('Detailed position data not available. Try moving around first.');
+        }
+    });
+
     // Command to toggle position logging
     mod.command.add('poslog', () => {
         if (positionInterval) {
@@ -480,6 +526,33 @@ module.exports = function PlayerPositionLogger(mod) {
             mod.command.message('Position logging stopped');
         } else {
             startPositionLogging();
+        }
+    });
+
+    // Command to save current position to a separate file
+    mod.command.add('savepos', () => {
+        if (lastPosition) {
+            const positionData = {
+                timestamp: new Date().toISOString(),
+                position: {
+                    x: Math.round(lastPosition.x * 100) / 100,
+                    y: Math.round(lastPosition.y * 100) / 100,
+                    z: Math.round(lastPosition.z * 100) / 100
+                },
+                facing: lastFacingDirection ? Math.round(lastFacingDirection * 100) / 100 : null,
+                lookDirection: lastLookDirection ? Math.round(lastLookDirection * 100) / 100 : null,
+                destination: lastDestination ? {
+                    x: Math.round(lastDestination.x * 100) / 100,
+                    y: Math.round(lastDestination.y * 100) / 100,
+                    z: Math.round(lastDestination.z * 100) / 100
+                } : null
+            };
+            
+            const savePath = path.join(rawLogsDir, 'last_C_PLAYER_LOCATION.json');
+            fs.writeFileSync(savePath, JSON.stringify(positionData, null, 2));
+            mod.command.message(`Position saved to ${savePath}`);
+        } else {
+            mod.command.message('No position data available to save.');
         }
     });
 
