@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-08-27T03:39:23.648Z",
+  "position": {
+    "x": 21808.34,
+    "y": 4677.61,
+    "z": 6175.2
+  },
+  "facing": 1.64,
+  "facingDegrees": 93.9,
+  "lookDirection": null,
+  "lookDirectionDegrees": null,
+  "aim": null,
+  "destination": {
+    "x": 21808.34,
+    "y": 4677.61,
+    "z": 6175.2
+  }
+}
