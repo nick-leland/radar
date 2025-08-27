@@ -548,7 +548,8 @@ module.exports = function PlayerPositionLogger(mod) {
                 } : null
             };
             
-            const savePath = path.join(rawLogsDir, 'last_C_PLAYER_LOCATION.json');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const savePath = path.join(rawLogsDir, `last_C_PLAYER_LOCATION_${timestamp}.json`);
             fs.writeFileSync(savePath, JSON.stringify(positionData, null, 2));
             mod.command.message(`Position saved to ${savePath}`);
         } else {
