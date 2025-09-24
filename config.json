@@ -1,0 +1,10 @@
+{
+  "radarRadius": 50,
+  "updateInterval": 50,
+  "outputFile": "radar_output.ndjson",
+  "includeNPCs": true,
+  "includeMonsters": true,
+  "includePlayers": true,
+  "includeHealthData": true,
+  "logLevel": "info"
+}
