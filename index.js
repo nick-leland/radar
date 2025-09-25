@@ -86,6 +86,8 @@ module.exports = async function TeraRadarModMain(mod) {
             }
         }, radar_interval);
 
+        // TODO: Add some sort of in game call to view the last sent data
+
         // Clean up interval when leaving game
         mod.game.on('leave_game', () => {
             if (radarInterval) {
