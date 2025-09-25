@@ -3,7 +3,16 @@
 const DataProcessor = require('./lib/DataProcessor');
 const EntityTracker = require('./lib/EntityTracker');
 const PacketInterceptor = require('./lib/PacketInterceptor');
-const zmq = require("zeromq")
+
+// Try to load ZeroMQ with fallback
+let zmq;
+try {
+    zmq = require("zeromq");
+} catch (error) {
+    console.error('[TeraRadarMod] ZeroMQ failed to load:', error.message);
+    console.error('[TeraRadarMod] Please run: node build.js to rebuild ZeroMQ for Electron');
+    throw new Error('ZeroMQ not available. Run "node build.js" to install properly.');
+}
 
 // Constants
 const radar_interval = 1500;
@@ -31,7 +40,7 @@ async function send_to_server(data, sock, radar_interval) {
 }
 
 
-module.exports = async function TeraRadarModMain(mod) {
+module.exports = function TeraRadarModMain(mod) {
     mod.log('[TeraRadarMod] Creating DataProcessor...');
     // Initialize DataProcessor
     const dataProcessor = new DataProcessor();

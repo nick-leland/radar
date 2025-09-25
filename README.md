@@ -62,6 +62,19 @@ const radar_radius = 1000;    // meters
 
 ## Installation
 
-1. `npm install zeromq`
-2. Copy mod to TERA Toolbox
+### Quick Start (Automated)
+1. Copy mod to TERA Toolbox
+2. Run: `node build.js` (in the radar mod directory)
 3. Start TERA
+
+### Manual Installation
+1. Install dependencies: `npm install`
+2. Rebuild for Electron: `npx electron-rebuild -f -w zeromq --electron-version=11.0.5`
+3. Start TERA
+
+### Prerequisites
+- Python 3.x
+- C++ Build Tools (Visual Studio Build Tools on Windows)
+- See [INSTALL.md](INSTALL.md) for detailed instructions
+
+**Note**: ZeroMQ requires native compilation for Electron 11.0.5 compatibility.

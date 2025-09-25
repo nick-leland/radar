@@ -1,8 +1,8 @@
 {
   "name": "radar",
-  "author": "Tera Radar Team",
-  "description": "High-performance TERA Toolbox radar mod for real-time entity tracking and aimbot integration",
-  "version": "2.0.0",
+  "author": "Nicholas Leland",
+  "description": "Pseudo Radar which uses ZeroMQ to send packets to a server",
+  "version": "1.0.0",
   "main": "index.js",
   "dependencies": {}
 }
