@@ -17,8 +17,27 @@ A high-performance TERA Toolbox modification that provides real-time entity trac
 
 1. **Install the mod** in your TERA Toolbox mods folder
 2. **Start TERA** and load into the game
-3. **Enable radar output**: Use `radarstart` command in-game
-4. **Run Python integration**: `python examples/python_integration.py`
+3. **Test the mod**: Use `radartest` or `radar test` command in-game
+4. **Enable radar output**: Use `radarstart` or `radar start` command
+5. **Run Python integration**: `python examples/python_integration.py`
+
+### First Time Setup
+
+After installing and loading into TERA:
+
+```
+# Test that commands work
+radartest
+
+# Check system status  
+radarstatus
+
+# Start radar output
+radarstart
+
+# Verify output is working
+radaroutput
+```
 
 ## Radar System
 
@@ -143,18 +162,164 @@ The `w` value in position packets often returns 0 because:
 
 ## Commands
 
-### Radar Control
-- `radarstart` - Start continuous radar data output to file
-- `radarstop` - Stop radar data output
-- `radaroutput` - Show current output status and file location
-- `radar` - Manual scan and display nearby entities in chat
-- `radarradius <meters>` - Set radar scan radius (default: 50m)
+The TERA Radar Mod provides two command interfaces: **individual commands** and a **subcommand system**. Both interfaces provide the same functionality with different syntax options.
 
-### Legacy Position Commands
-- `pos` - Display current player position
-- `posdetail` - Show detailed position information
-- `/poslog` - Toggle position logging
-- `/savepos` - Save current position to file
+### Individual Commands
+
+These commands work directly without any prefix:
+
+- `radarstart` - Start continuous radar data output to file
+- `radarstop` - Stop radar data output  
+- `radarstatus` - Display current radar system status
+- `radarconfig [key] [value]` - View or modify configuration settings
+- `radarradius <number>` - Set radar scanning radius (1-1000 meters)
+- `radaroutput` - Show current output status and file location
+- `radarperf` - Display performance metrics and statistics
+- `radarbench` - Run performance benchmark test
+- `radartest` - Test command functionality
+
+### Subcommand System
+
+Use `radar <subcommand>` or the short alias `r <subcommand>`:
+
+#### Basic Control
+- `radar start` or `radar on` - Start continuous radar output (same as `radarstart`)
+- `radar stop` or `radar off` - Stop radar output (same as `radarstop`)
+- `radar status` or `radar s` - Show system status (same as `radarstatus`)
+
+#### Configuration
+- `radar config` - Show all configuration settings
+- `radar config <key>` - Show specific configuration value
+- `radar config <key> <value>` - Set configuration value
+- `radar radius <number>` - Set scanning radius (same as `radarradius`)
+
+#### Information & Testing
+- `radar output` or `radar out` - Show output file status (same as `radaroutput`)
+- `radar perf` or `radar performance` - Show performance metrics (same as `radarperf`)
+- `radar bench` or `radar benchmark` - Run benchmark (same as `radarbench`)
+- `radar test` - Test command functionality (same as `radartest`)
+- `radar help` or `radar ?` - Show command help
+
+#### Manual Scanning
+- `radar` - Perform manual radar scan with default radius
+- `radar <number>` - Perform manual scan with custom radius (e.g., `radar 200`)
+
+### Command Examples
+
+#### Starting and Stopping Radar Output
+```
+# Individual commands
+radarstart
+radarstop
+
+# Subcommand system  
+radar start
+radar stop
+r on
+r off
+```
+
+#### Configuration Management
+```
+# View all settings
+radarconfig
+radar config
+
+# View specific setting
+radar config radarRadius
+
+# Change settings
+radarradius 150
+radar radius 150
+radar config updateInterval 100
+```
+
+#### Manual Scanning
+```
+# Default radius scan
+radar
+
+# Custom radius scan
+radar 200
+r 75
+
+# Check what entities are nearby
+radar status
+```
+
+#### Performance Monitoring
+```
+# Check performance
+radarperf
+radar performance
+
+# Run benchmark
+radarbench  
+radar bench
+```
+
+### Configuration Keys
+
+Valid configuration keys for `radarconfig` and `radar config`:
+
+- `radarRadius` - Scanning radius in meters (1-1000)
+- `updateInterval` - Update frequency in milliseconds  
+- `outputFile` - Output file name
+- `includeNPCs` - Include NPCs in tracking (true/false)
+- `includeMonsters` - Include monsters in tracking (true/false)
+- `includePlayers` - Include players in tracking (true/false)
+- `includeHealthData` - Include health information (true/false)
+- `logLevel` - Logging verbosity (error/warn/info/debug)
+
+### Troubleshooting Commands
+
+#### Command Not Working?
+
+1. **Test basic functionality:**
+   ```
+   radartest
+   radar test
+   ```
+
+2. **Check system status:**
+   ```
+   radarstatus
+   radar status
+   ```
+
+3. **Verify game connection:**
+   - Commands may not work immediately after entering game
+   - Wait for "Radar system ready" message
+   - Try again after game world fully loads
+
+#### Common Issues
+
+**"Radar system not ready" message:**
+- Wait for game to fully load before using commands
+- Some commands (test, status, help) work during initialization
+- Other commands require complete game connection
+
+**Individual commands not working:**
+- The mod automatically falls back to subcommand system
+- Use `radar <subcommand>` instead of individual commands
+- Check chat for registration status messages
+
+**"Unknown subcommand" error:**
+- Use `radar help` to see all available subcommands
+- Check spelling and syntax
+- Some subcommands have aliases (e.g., `s` for `status`)
+
+**Configuration errors:**
+- Use valid configuration keys (see list above)
+- Check value types (numbers for radius, true/false for booleans)
+- Use `radar config` to see current settings
+
+#### Getting Help
+
+- `radar help` - Complete command reference
+- `radarstatus` - Current system state
+- `radar config` - Current configuration
+- Check TERA Toolbox console for detailed error messages
 
 ## Installation
 
@@ -162,7 +327,25 @@ The `w` value in position packets often returns 0 because:
 2. **Copy** the mod folder to your TERA Toolbox mods directory
 3. **Restart** TERA Toolbox
 4. **Load** into TERA and enter the game world
-5. **Start radar**: Use `radarstart` command to begin data output
+5. **Wait for initialization**: Look for "Radar system ready" message
+6. **Test commands**: Use `radartest` to verify functionality
+7. **Start radar**: Use `radarstart` or `radar start` to begin data output
+
+### System Requirements
+
+- **TERA Toolbox**: Latest version recommended
+- **Game State**: Must be fully loaded into game world
+- **Connection**: Stable connection to TERA servers
+- **Permissions**: Write access to mod directory for output files
+
+### Command System Compatibility
+
+The mod uses a **dual command system** for maximum compatibility:
+
+- **Individual Commands**: Direct commands like `radarstart`, `radarstop`
+- **Subcommand System**: Unified interface like `radar start`, `radar stop`
+- **Automatic Fallback**: If individual commands fail, subcommand system provides backup
+- **Error Handling**: Clear feedback when commands are unavailable
 
 ## Python Integration
 
@@ -194,12 +377,33 @@ if target:
 
 The mod uses a modular architecture with the following components:
 
-- **TeraRadarMod** - Main orchestrator class
-- **PacketInterceptor** - Handles network packet interception
-- **EntityTracker** - Manages entity lifecycle and spatial tracking
+- **TeraRadarMod** - Main orchestrator class with dual command system
+- **EntityTracker** - Manages entity lifecycle and spatial tracking  
 - **DataProcessor** - Transforms raw packet data into standardized formats
 - **FileOutputManager** - Handles atomic file operations
 - **ConfigManager** - Manages configuration and settings
+- **Command System** - Dual interface supporting individual and subcommands
+
+### Command Architecture
+
+The mod implements a **robust dual command system**:
+
+#### Individual Command Registration
+- Registers commands like `radarstart`, `radarstop`, `radarstatus`
+- Each command has dedicated error handling and validation
+- Fallback mechanisms when registration fails
+
+#### Subcommand System  
+- Unified `radar` command with subcommand parsing
+- Short alias `r` for quick access
+- Comprehensive help system and parameter validation
+- Consistent error handling across all subcommands
+
+#### Error Handling & Fallback
+- Graceful degradation when individual commands fail
+- Automatic fallback to subcommand system
+- Clear user feedback about command availability
+- System readiness checks before command execution
 
 ### Packet Hooks
 
@@ -246,72 +450,7 @@ The mod uses `config.json` for settings:
 - **Game Analysis**: Entity tracking and movement pattern analysis
 - **Radar Functionality**: Enhanced situational awareness
 - **Data Logging**: Comprehensive game state recording
-##
- Legacy Position Tracking
 
-The mod also includes legacy position tracking functionality for backward compatibility:
-
-### How to Get Player Position
-
-The mod demonstrates several ways to access the player's current position:
-
-#### 1. Direct Access via mod.game.me.loc
-```javascript
-if (mod.game.me && mod.game.me.loc) {
-    const position = mod.game.me.loc;
-    console.log(`Position: X=${position.x}, Y=${position.y}, Z=${position.z}, W=${position.w}`);
-}
-```
-
-#### 2. Hook into Movement Packets
-```javascript
-// Player walking/running movement
-mod.hook('C_PLAYER_LOCATION', 5, (event) => {
-    const position = event.loc; // {x, y, z, w}
-    const lookDirection = event.lookDirection; // More accurate facing direction
-});
-
-// Player flying movement  
-mod.hook('C_PLAYER_FLYING_LOCATION', 4, (event) => {
-    const position = event.loc; // {x, y, z, w}
-    const direction = event.direction; // Direction vector
-});
-```
-
-#### 3. Get Accurate Facing Direction
-The `w` value in position data often returns 0. Better sources for direction:
-
-**Look Direction (Most Reliable)**
-```javascript
-mod.hook('C_PLAYER_LOCATION', 5, (event) => {
-    if (event.lookDirection !== undefined) {
-        console.log('Facing direction:', event.lookDirection); // In radians
-    }
-});
-```
-
-**User Aim Data**
-```javascript
-mod.hook('C_USER_AIM', 1, (event) => {
-    console.log('Aim Yaw:', event.yaw); // Horizontal rotation
-    console.log('Aim Pitch:', event.pitch); // Vertical rotation
-});
-```
-
-### Position Data Structure
-The position object contains:
-- `x`: X coordinate (horizontal)
-- `y`: Y coordinate (vertical/height) 
-- `z`: Z coordinate (depth)
-- `w`: Rotation/facing direction (often 0, use lookDirection instead)
-
-### Why W is Often 0
-
-The `w` value in position packets often returns 0 because:
-1. **Movement vs. Direction**: The `w` field represents movement direction, not facing direction
-2. **Look Direction**: The actual facing direction is stored in `lookDirection` field
-3. **Aim System**: For precise direction, use `C_USER_AIM` packets with yaw/pitch
-4. **Flying**: When flying, direction is stored as a 3D vector in `direction` field
 
 ## Contributing
 

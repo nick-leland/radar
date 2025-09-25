@@ -1,10 +1,8 @@
 {
-  "name": "tera-radar",
+  "name": "radar",
   "author": "Tera Radar Team",
   "description": "High-performance TERA Toolbox radar mod for real-time entity tracking and aimbot integration",
   "version": "2.0.0",
   "main": "index.js",
-  "dependencies": {
-    "tera-game-state": "^1.0.0"
-  }
+  "dependencies": {}
 }

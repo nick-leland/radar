@@ -1,62 +1,100 @@
-
 'use strict';
 
-const TeraRadarMod = require('./lib/TeraRadarMod');
+const DataProcessor = require('./lib/DataProcessor');
+const EntityTracker = require('./lib/EntityTracker');
+const PacketInterceptor = require('./lib/PacketInterceptor');
+const zmq = require("zeromq")
 
-/**
- * Tera Radar Mod - Main Entry Point
- * A high-performance modification for Tera Toolbox that provides real-time entity tracking
- * optimized for external Python consumption and aimbot integration.
- * 
- * This is the clean, optimized entry point that uses the new modular architecture.
- * All legacy code has been migrated to the appropriate classes.
- */
-module.exports = function TeraRadarModMain(mod) {
-    mod.log('[TeraRadarMod] Module entry point called');
-    
+// Constants
+const radar_interval = 1500;
+const radar_radius = 1000;
+
+async function create_socket() {
     try {
-        mod.log('[TeraRadarMod] Creating TeraRadarMod instance...');
-        
-        // Create and initialize the main mod instance first
-        const radarMod = new TeraRadarMod(mod);
-        
-        mod.log('[TeraRadarMod] TeraRadarMod instance created successfully');
+        const sock = new zmq.Publisher()
+        await sock.bind("tcp://127.0.0.1:3000")
+        mod.log("Publisher bound to port 3000")
+        return sock
+    } catch (error) {
+        mod.error(`[TeraRadarMod] Error creating socket: ${error.message}`);
+        return null
+    }
+}
 
-        // Add debug logging for command registration
-        mod.log('[TeraRadarMod] Attempting to register commands...');
+async function send_to_server(data, sock, radar_interval) {
+    try {
+      mod.log("Sending data to server")
+      await sock.send([data])
+    } catch (error) {
+        mod.error(`[TeraRadarMod] Error sending data to server: ${error.message}`);
+    }
+}
 
-        // Commands will be registered after entering game in TeraRadarMod.onEnterGame()
-        mod.log('[TeraRadarMod] Initialization complete, commands will be registered after entering game');
 
-        // Store reference for cleanup
-        mod._radarModInstance = radarMod;
+module.exports = async function TeraRadarModMain(mod) {
+    mod.log('[TeraRadarMod] Creating DataProcessor...');
+    // Initialize DataProcessor
+    const dataProcessor = new DataProcessor();
 
-        // Handle mod unload/reload gracefully
-        const cleanup = () => {
-            if (mod._radarModInstance) {
-                try {
-                    mod._radarModInstance.cleanup();
-                    mod._radarModInstance = null;
-                } catch (error) {
-                    mod.error(`[TeraRadarMod] Cleanup error: ${error.message}`);
-                }
-            }
-        };
+    mod.log('[TeraRadarMod] Creating EntityTracker...');
+    // Initialize EntityTracker with radar radius from config
+    const entityTracker = new EntityTracker(radar_radius);
 
-        // Register cleanup handlers
-        process.on('exit', cleanup);
-        process.on('SIGINT', cleanup);
-        process.on('SIGTERM', cleanup);
+    mod.log('[TeraRadarMod] Creating PacketInterceptor...');
+    // Initialize PacketInterceptor with dependencies
+    const packetInterceptor = new PacketInterceptor(
+        mod,
+        dataProcessor,
+        entityTracker
+    );
 
-        // Handle mod-specific cleanup
-        if (mod.destructor) {
-            mod.destructor(cleanup);
+    mod.game.on('enter_game', async () => {
+        mod.log('[TeraRadarMod] Entered game - initializing systems');
+
+        const sock = await create_socket();
+
+        // Initialize portion to begin tracing those packages
+        try {
+            packetInterceptor.initializeHooks();
+            mod.log('[TeraRadarMod] Packet interceptor hooks initialized successfully');
+        } catch (error) {
+            mod.error(`[TeraRadarMod] Error initializing packet interceptor: ${error.message}`);
         }
 
-        mod.log('[TeraRadarMod] Successfully initialized with optimized architecture');
+        // Set up periodic radar data sending
+        const radarInterval = setInterval(async () => {
+            try {
+                // Combine all the data into a single object 
+                // (Player position and other entities)
+                const { position: character_position, rotation, yaw, pitch, isActive } = packetInterceptor.getPlayerState();
+                const entities = entityTracker.getEntitiesInRadius();
+                const entity_output = {
+                    "player": {
+                        "position": character_position,
+                        "rotation": rotation,
+                        "yaw": yaw,
+                        "pitch": pitch,
+                        "isActive": isActive
+                    },
+                    "entities": entities
+                };
 
-    } catch (error) {
-        mod.error(`[TeraRadarMod] Initialization failed: ${error.message}`);
-        mod.error(`[TeraRadarMod] Stack trace: ${error.stack}`);
-    }
+                // Send the data to the server
+                await send_to_server(JSON.stringify(entity_output), sock);
+            } catch (error) {
+                mod.error(`[TeraRadarMod] Error in radar interval: ${error.message}`);
+            }
+        }, radar_interval);
+
+        // Clean up interval when leaving game
+        mod.game.on('leave_game', () => {
+            if (radarInterval) {
+                clearInterval(radarInterval);
+                mod.log('[TeraRadarMod] Radar interval cleared');
+            }
+        });
+
+    });
+
+    
 };
