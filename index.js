@@ -18,7 +18,12 @@ try {
 const radar_interval = 1500;
 const radar_radius = 1000;
 
-async function create_socket() {
+// Helper to safely stringify objects containing BigInt values
+const safeStringify = (payload) => {
+    return JSON.stringify(payload, (_, value) => typeof value === 'bigint' ? value.toString() : value);
+};
+
+async function create_socket(mod) {
     try {
         const sock = new zmq.Publisher()
         await sock.bind("tcp://127.0.0.1:3000")
@@ -30,10 +35,15 @@ async function create_socket() {
     }
 }
 
-async function send_to_server(data, sock, radar_interval) {
+async function send_to_server(mod, data, sock) {
     try {
-      mod.log("Sending data to server")
-      await sock.send([data])
+        if (!sock) {
+            throw new Error('Socket is not initialized');
+        }
+
+        const serializedPayload = safeStringify(data);
+        mod.log("Sending data to server")
+        await sock.send([serializedPayload])
     } catch (error) {
         mod.error(`[TeraRadarMod] Error sending data to server: ${error.message}`);
     }
@@ -60,7 +70,7 @@ module.exports = function TeraRadarModMain(mod) {
     mod.game.on('enter_game', async () => {
         mod.log('[TeraRadarMod] Entered game - initializing systems');
 
-        const sock = await create_socket();
+        const sock = await create_socket(mod);
 
         // Initialize portion to begin tracing those packages
         try {
@@ -89,7 +99,7 @@ module.exports = function TeraRadarModMain(mod) {
                 };
 
                 // Send the data to the server
-                await send_to_server(JSON.stringify(entity_output), sock);
+                await send_to_server(mod, entity_output, sock);
             } catch (error) {
                 mod.error(`[TeraRadarMod] Error in radar interval: ${error.message}`);
             }
