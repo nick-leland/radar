@@ -26,6 +26,16 @@ Before installing, make sure you have:
    node build.js
    ```
 
+   If that fails, try the simple build script:
+   ```bash
+   node build-simple.js
+   ```
+
+   Or on Windows, try the PowerShell script:
+   ```powershell
+   .\build.ps1
+   ```
+
 ### Method 2: Manual Installation
 
 1. Install dependencies:

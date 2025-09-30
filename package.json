@@ -11,6 +11,9 @@
     "electron-rebuild": "^3.2.9",
     "zeromq": "^6.0.0"
   },
+  "devDependencies": {
+    "node-gyp": "^9.0.0"
+  },
   "electronRebuildConfig": {
     "electronVersion": "11.0.5",
     "force": true,
