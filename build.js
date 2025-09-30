@@ -7,15 +7,6 @@ const fs = require('fs');
 console.log('Building ZeroMQ for Electron 11.0.5...');
 
 try {
-    // Set environment variables for Electron rebuild
-    process.env.npm_config_target = '11.0.5';
-    process.env.npm_config_arch = process.arch;
-    process.env.npm_config_target_arch = process.arch;
-    process.env.npm_config_disturl = 'https://electronjs.org/headers';
-    process.env.npm_config_runtime = 'electron';
-    process.env.npm_config_cache = path.join(__dirname, 'node_modules', '.cache');
-    process.env.npm_config_build_from_source = 'true';
-
     console.log('Installing dependencies...');
     execSync('npm install', { stdio: 'inherit', cwd: __dirname });
 

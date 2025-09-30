@@ -43,7 +43,7 @@ Before installing, make sure you have:
 If the above methods fail, try building from source:
 
 ```bash
-npm install --build-from-source zeromq
+npm install zeromq
 npx electron-rebuild -f -w zeromq --electron-version=11.0.5
 ```
 
