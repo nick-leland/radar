@@ -26,9 +26,14 @@ Before installing, make sure you have:
    node build.js
    ```
 
-   If that fails, try the simple build script:
+   If that fails, try the fixed build script:
    ```bash
-   node build-simple.js
+   node build-fix.js
+   ```
+
+   If that still fails, try the alternative approach:
+   ```bash
+   node build-alternative.js
    ```
 
    Or on Windows, try the PowerShell script:

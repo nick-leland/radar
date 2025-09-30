@@ -4,14 +4,23 @@ const DataProcessor = require('./lib/DataProcessor');
 const EntityTracker = require('./lib/EntityTracker');
 const PacketInterceptor = require('./lib/PacketInterceptor');
 
-// Try to load ZeroMQ with fallback
+// Try to load ZeroMQ with fallback to alternative package
 let zmq;
 try {
     zmq = require("zeromq");
+    console.log('[TeraRadarMod] Using zeromq package');
 } catch (error) {
-    console.error('[TeraRadarMod] ZeroMQ failed to load:', error.message);
-    console.error('[TeraRadarMod] Please run: node build.js to rebuild ZeroMQ for Electron');
-    throw new Error('ZeroMQ not available. Run "node build.js" to install properly.');
+    console.log('[TeraRadarMod] zeromq failed, trying zmq package...');
+    try {
+        zmq = require("zmq");
+        console.log('[TeraRadarMod] Using zmq package');
+    } catch (error2) {
+        console.error('[TeraRadarMod] Both ZeroMQ packages failed to load');
+        console.error('[TeraRadarMod] zeromq error:', error.message);
+        console.error('[TeraRadarMod] zmq error:', error2.message);
+        console.error('[TeraRadarMod] Please run: node build-fix.js or node build-alternative.js');
+        throw new Error('ZeroMQ not available. Run "node build-fix.js" or "node build-alternative.js" to install properly.');
+    }
 }
 
 // Constants
