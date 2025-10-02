@@ -20,7 +20,7 @@ try {
     execSync('npm install', { stdio: 'inherit', cwd: __dirname });
 
     console.log('Rebuilding ZeroMQ for Electron...');
-    execSync('npx electron-rebuild -f -w zeromq --electron-version=11.0.5', { 
+    execSync('npx electron-rebuild -f -w zeromq --version=11.0.5 --project-dir "..\\..\\.."', { 
         stdio: 'inherit', 
         cwd: __dirname 
     });

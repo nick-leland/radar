@@ -12,47 +12,61 @@ Before installing, make sure you have:
    - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
    - **Linux**: `build-essential` package
 
-## Installation Methods
+## Recommended Workflow (Matches Current Setup)
 
-### Method 1: Automated Build Script (Recommended)
-
-1. Navigate to the radar mod directory:
-   ```bash
-   cd "D:\TERA Starscape\TERA Starscape Toolbox\mods\radar"
+1. **Clean any previous install (optional but recommended):**
+   ```powershell
+   Remove-Item node_modules -Recurse -Force
+   Remove-Item package-lock.json -Force
    ```
 
-2. Run the build script:
-   ```bash
-   node build.js
+2. **Pin Zeromq to 6.0.0 in `package.json`:**
+   ```json
+   "dependencies": {
+     "electron-rebuild": "^3.2.9",
+     "zeromq": "6.0.0"
+   }
    ```
 
-### Method 2: Manual Installation
-
-1. Install dependencies:
-   ```bash
-   npm install
+3. **Install dependencies without running package scripts:**
+   ```powershell
+   npm install --ignore-scripts
    ```
 
-2. Rebuild ZeroMQ for Electron 11.0.5:
-   ```bash
-   npx electron-rebuild -f -w zeromq --electron-version=11.0.5
+4. **Rebuild Zeromq against Electron 11.0.5 (Toolbox root is 3 levels up):**
+   ```powershell
+   npx electron-rebuild -f -w zeromq --electron-version=11.0.5 --project-dir "..\..\.."
    ```
 
-### Method 3: Force Build from Source
+   > You can alternatively run `node build.js`, which now issues the same command internally.
 
-If the above methods fail, try building from source:
+5. **Verification:**
+   ```powershell
+   node -e "const zmq = require('zeromq'); console.log('ZeroMQ version:', zmq.version);"
+   ```
 
-```bash
-npm install --build-from-source zeromq
-npx electron-rebuild -f -w zeromq --electron-version=11.0.5
+6. **Launch TERA Toolbox and confirm the radar mod loads without ZeroMQ errors.**
+
+## Alternative Workflows
+
+### Automated Build Script (after initial setup)
+Once Zeromq is pinned to 6.0.0 and the first install has completed, you can rerun:
+```powershell
+node build.js
+```
+This script now calls the rebuild command with the correct project directory.
+
+### Manual Installation (if you prefer explicit steps)
+```powershell
+npm install --ignore-scripts
+npx electron-rebuild -f -w zeromq --electron-version=11.0.5 --project-dir "..\..\.."
 ```
 
-## Verification
-
-After installation, test that ZeroMQ works:
-
-```bash
-node -e "const zmq = require('zeromq'); console.log('ZeroMQ version:', zmq.version);"
+### Force Build from Source (last resort)
+```powershell
+npm install --ignore-scripts
+npm install --build-from-source zeromq@6.0.0 --save-exact
+npx electron-rebuild -f -w zeromq --electron-version=11.0.5 --project-dir "..\..\.."
 ```
 
 ## Troubleshooting
@@ -61,43 +75,30 @@ node -e "const zmq = require('zeromq'); console.log('ZeroMQ version:', zmq.versi
 
 1. **"Python not found"**: Install Python 3.x and ensure it's in your PATH
 2. **"MSBuild not found"**: Install Visual Studio Build Tools
-3. **"Permission denied"**: Run as administrator (Windows) or use `sudo` (macOS/Linux)
+3. **`run-p` not recognized**: This goes away when using `npm install --ignore-scripts`
+4. **Electron version not detected**: Include `--project-dir "..\..\.."` or run `node build.js`
 
 ### Windows Specific
-
 If you get MSBuild errors:
 1. Install Visual Studio Build Tools 2019 or later
 2. Run: `npm config set msvs_version 2019`
 3. Try the installation again
 
 ### macOS Specific
-
-If you get Xcode errors:
 ```bash
 xcode-select --install
 ```
 
 ### Linux Specific
-
-Install build essentials:
 ```bash
 sudo apt-get update
 sudo apt-get install build-essential python3-dev
 ```
 
-## Alternative: Use Pre-built Binaries
-
-If compilation continues to fail, you can try using pre-built binaries:
-
-```bash
-npm install zeromq@6.0.0 --target=11.0.5 --target_arch=x64 --target_platform=win32
-```
-
 ## Success Indicators
 
-When successful, you should see:
 - ZeroMQ installation completes without errors
-- The radar mod loads without "ERR_PACKAGE_PATH_NOT_EXPORTED" errors
+- The radar mod loads without "ZeroMQ failed to load" messages
 - TERA Toolbox shows the mod as loaded successfully
 
 ## Getting Help
